@@ -1,5 +1,5 @@
-﻿using SimplePaymentGateway.Application.DTOs;
-using SimplePaymentGateway.Domain.Common;
+﻿using SimplePaymentGateway.Application.Common;
+using SimplePaymentGateway.Application.DTOs;
 using SimplePaymentGateway.Domain.Entities;
 
 namespace SimplePaymentGateway.Application.Contracts;

@@ -1,4 +1,4 @@
-﻿namespace SimplePaymentGateway.Domain.contracts;
+﻿namespace SimplePaymentGateway.Application.Contracts;
 
 public interface IKeyManager
 {

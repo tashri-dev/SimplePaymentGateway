@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SimplePaymentGateway.Domain.contracts;
+using SimplePaymentGateway.Application.Contracts;
+using SimplePaymentGateway.Infrastructure.Contracts;
 using SimplePaymentGateway.Infrastructure.Exceptions;
 using SimplePaymentGateway.Infrastructure.Options;
 using StackExchange.Redis;
@@ -10,29 +11,28 @@ namespace SimplePaymentGateway.Infrastructure.Services.KeyManagement;
 
 public class RedisKeyManager : IKeyManager
 {
-    private readonly IConnectionMultiplexer _redis;
-    private readonly RedisKeyManagerOptions _options;
+    private readonly IRedisConnectionFactory _redisFactory;
+    private readonly RedisOptions _options;
     private readonly ILogger<RedisKeyManager> _logger;
-    private readonly IDatabase _db;
 
     public RedisKeyManager(
-        IConnectionMultiplexer redis,
-        IOptions<RedisKeyManagerOptions> options,
+        IRedisConnectionFactory redisFactory,
+        IOptions<RedisOptions> options,
         ILogger<RedisKeyManager> logger)
     {
-        _redis = redis;
+        _redisFactory = redisFactory;
         _options = options.Value;
         _logger = logger;
-        _db = _redis.GetDatabase();
     }
 
     public async Task<string> GetKey(string keyIdentifier)
     {
         try
         {
+            var db = _redisFactory.GetDatabase();
             var key = GetFullKeyName(keyIdentifier);
             var value = await ExecuteWithRetryAsync(async () =>
-                await _db.StringGetAsync(key));
+                await db.StringGetAsync(key));
 
             if (value.IsNull)
             {
@@ -58,13 +58,14 @@ public class RedisKeyManager : IKeyManager
     {
         try
         {
+            var db = _redisFactory.GetDatabase();
             var fullKey = GetFullKeyName(keyIdentifier);
             var value = _options.EnableCompression
                 ? await CompressValue(key)
                 : key;
 
             await ExecuteWithRetryAsync(async () =>
-                await _db.StringSetAsync(
+                await db.StringSetAsync(
                     fullKey,
                     value,
                     expiry ?? _options.DefaultExpiry));
@@ -85,9 +86,10 @@ public class RedisKeyManager : IKeyManager
     {
         try
         {
+            var db = _redisFactory.GetDatabase();
             var key = GetFullKeyName(keyIdentifier);
             var result = await ExecuteWithRetryAsync(async () =>
-                await _db.KeyDeleteAsync(key));
+                await db.KeyDeleteAsync(key));
 
             _logger.LogInformation(
                 "Removed key: {KeyIdentifier}, Success: {Success}",
@@ -107,9 +109,10 @@ public class RedisKeyManager : IKeyManager
     {
         try
         {
+            var db = _redisFactory.GetDatabase();
             var key = GetFullKeyName(keyIdentifier);
             return await ExecuteWithRetryAsync(async () =>
-                await _db.KeyExistsAsync(key));
+                await db.KeyExistsAsync(key));
         }
         catch (Exception ex)
         {
@@ -117,6 +120,7 @@ public class RedisKeyManager : IKeyManager
             throw new KeyManagerException("Failed to check key existence", ex);
         }
     }
+
 
     private string GetFullKeyName(string keyIdentifier) =>
         $"{_options.InstanceName}{_options.KeyPrefix}{keyIdentifier}";
@@ -138,7 +142,7 @@ public class RedisKeyManager : IKeyManager
                     "Retry {RetryCount} of {MaxRetries}",
                     retryCount,
                     _options.RetryCount);
-                await Task.Delay(_options.RetryDelay * retryCount);
+                await Task.Delay(_options.RetryDelayMilliseconds * retryCount);
             }
         }
     }

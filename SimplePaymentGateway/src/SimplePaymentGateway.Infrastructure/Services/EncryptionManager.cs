@@ -52,44 +52,36 @@ public class EncryptionManager : IEncryptionManager
     {
         try
         {
-            if (!ValidateKey(key))
-            {
-                throw new ArgumentException("Invalid encryption key", nameof(key));
-            }
-
             if (string.IsNullOrEmpty(data))
-            {
-                throw new ArgumentException("Data to encrypt cannot be null or empty", nameof(data));
-            }
+                throw new ArgumentException("Data to encrypt cannot be null or empty");
 
-            var iv = new byte[IvSize];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(iv);
+            if (!ValidateKey(key))
+                throw new ArgumentException("Invalid encryption key");
 
             using var aes = Aes.Create();
             aes.Key = Convert.FromBase64String(key);
+            var iv = Convert.FromBase64String(GenerateIV());
             aes.IV = iv;
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.PKCS7;
 
             using var encryptor = aes.CreateEncryptor();
             using var msEncrypt = new MemoryStream();
+
+            // Write IV first
+            msEncrypt.Write(iv, 0, iv.Length);
+
             using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
             using (var swEncrypt = new StreamWriter(csEncrypt))
             {
                 swEncrypt.Write(data);
             }
 
-            var encryptedBytes = msEncrypt.ToArray();
-            var result = new byte[iv.Length + encryptedBytes.Length];
-            Buffer.BlockCopy(iv, 0, result, 0, iv.Length);
-            Buffer.BlockCopy(encryptedBytes, 0, result, iv.Length, encryptedBytes.Length);
-
-            return Convert.ToBase64String(result);
+            return Convert.ToBase64String(msEncrypt.ToArray());
         }
-        catch (Exception ex) when (ex is not ArgumentException)
+        catch (Exception ex)
         {
-            _logger.LogError(ex, "Error encrypting data");
+            _logger.LogError(ex, "Encryption error");
             throw new EncryptionException("Failed to encrypt data", ex);
         }
     }
@@ -98,28 +90,22 @@ public class EncryptionManager : IEncryptionManager
     {
         try
         {
-            if (!ValidateKey(key))
-            {
-                throw new ArgumentException("Invalid encryption key", nameof(key));
-            }
-
             if (string.IsNullOrEmpty(encryptedData))
-            {
-                throw new ArgumentException("Encrypted data cannot be null or empty", nameof(encryptedData));
-            }
+                throw new ArgumentException("Encrypted data cannot be null or empty");
+
+            if (!ValidateKey(key))
+                throw new ArgumentException("Invalid encryption key");
 
             var fullCipher = Convert.FromBase64String(encryptedData);
 
             if (fullCipher.Length < IvSize)
-            {
-                throw new ArgumentException("Invalid encrypted data format", nameof(encryptedData));
-            }
+                throw new ArgumentException("Invalid encrypted data format");
 
             var iv = new byte[IvSize];
-            var cipher = new byte[fullCipher.Length - IvSize];
+            var cipherText = new byte[fullCipher.Length - IvSize];
 
-            Buffer.BlockCopy(fullCipher, 0, iv, 0, iv.Length);
-            Buffer.BlockCopy(fullCipher, iv.Length, cipher, 0, cipher.Length);
+            Buffer.BlockCopy(fullCipher, 0, iv, 0, IvSize);
+            Buffer.BlockCopy(fullCipher, IvSize, cipherText, 0, cipherText.Length);
 
             using var aes = Aes.Create();
             aes.Key = Convert.FromBase64String(key);
@@ -128,15 +114,15 @@ public class EncryptionManager : IEncryptionManager
             aes.Padding = PaddingMode.PKCS7;
 
             using var decryptor = aes.CreateDecryptor();
-            using var msDecrypt = new MemoryStream(cipher);
+            using var msDecrypt = new MemoryStream(cipherText);
             using var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
             using var srDecrypt = new StreamReader(csDecrypt);
 
             return srDecrypt.ReadToEnd();
         }
-        catch (Exception ex) when (ex is not ArgumentException)
+        catch (Exception ex)
         {
-            _logger.LogError(ex, "Error decrypting data");
+            _logger.LogError(ex, "Decryption error");
             throw new EncryptionException("Failed to decrypt data", ex);
         }
     }
@@ -155,5 +141,18 @@ public class EncryptionManager : IEncryptionManager
         {
             return false;
         }
+    }
+}
+
+// Domain/Exceptions/EncryptionException.cs
+public class EncryptionException : Exception
+{
+    public EncryptionException(string message) : base(message)
+    {
+    }
+
+    public EncryptionException(string message, Exception innerException)
+        : base(message, innerException)
+    {
     }
 }

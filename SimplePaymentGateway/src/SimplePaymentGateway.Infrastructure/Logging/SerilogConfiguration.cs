@@ -20,37 +20,74 @@ public static class SerilogConfigurationExtensions
         var options = new SerilogOptions();
         configuration.GetSection(SerilogOptions.ConfigSection).Bind(options);
 
+        // Configure minimum levels
         loggerConfiguration
-            .MinimumLevel.Is(Enum.Parse<LogEventLevel>(options.MinimumLevel))
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+            .MinimumLevel.Is(Enum.Parse<LogEventLevel>(options.MinimumLevel.Default));
+
+        // Configure overrides
+        if (options.MinimumLevel.Override != null)
+        {
+            foreach (var @override in options.MinimumLevel.Override)
+            {
+                loggerConfiguration.MinimumLevel.Override(
+                    @override.Key,
+                    Enum.Parse<LogEventLevel>(@override.Value));
+            }
+        }
+
+        // Configure enrichers
+        loggerConfiguration
             .Enrich.FromLogContext()
             .Enrich.WithMachineName()
-            .Enrich.WithEnvironmentName()
-            .Enrich.WithProperty("Application", "PaymentGateway")
-            .Enrich.WithProperty("Environment", environment.EnvironmentName);
+            .Enrich.WithEnvironmentName();
 
-        // Console logging
-        if (options.EnableConsole)
+        if (options.Enrich != null)
         {
-            loggerConfiguration.WriteTo.Console(new JsonFormatter());
+            foreach (var enricher in options.Enrich)
+            {
+                switch (enricher)
+                {
+                    case "WithThreadId":
+                        loggerConfiguration.Enrich.WithThreadId();
+                        break;
+                        // Add other custom enrichers as needed
+                }
+            }
         }
 
-        // File logging
-        if (options.EnableFile)
+        // Configure properties
+        if (options.Properties != null)
         {
-            loggerConfiguration.WriteTo.File(
-                new JsonFormatter(),
-                options.LogFilePath,
-                rollingInterval: RollingInterval.Day,
-                retainedFileCountLimit: 7);
+            foreach (var property in options.Properties)
+            {
+                loggerConfiguration.Enrich.WithProperty(property.Key, property.Value);
+            }
         }
 
-        // Elasticsearch logging
+        // Configure sinks
+        foreach (var sink in options.WriteTo)
+        {
+            switch (sink.Name.ToLower())
+            {
+                case "console":
+                    loggerConfiguration.WriteTo.Console(
+                        outputTemplate: sink.Args.OutputTemplate);
+                    break;
+                case "file":
+                    loggerConfiguration.WriteTo.File(
+                        path: sink.Args.Path,
+                        outputTemplate: sink.Args.OutputTemplate,
+                        rollingInterval: Enum.Parse<RollingInterval>(sink.Args.RollingInterval));
+                    break;
+            }
+        }
+
+        // Configure Elasticsearch
         if (options.Elasticsearch?.Url != null)
         {
             var elasticOptions = new ElasticsearchSinkOptions(new Uri(options.Elasticsearch.Url))
             {
-                AutoRegisterTemplate = true,
+                AutoRegisterTemplate = options.Elasticsearch.AutoRegisterTemplate,
                 AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
                 IndexFormat = options.Elasticsearch.IndexFormat ??
                     $"payment-gateway-{environment.EnvironmentName.ToLower()}-{DateTime.UtcNow:yyyy-MM}",
@@ -66,7 +103,8 @@ public static class SerilogConfigurationExtensions
                 EmitEventFailure = EmitEventFailureHandling.WriteToSelfLog |
                                  EmitEventFailureHandling.WriteToFailureSink |
                                  EmitEventFailureHandling.RaiseCallback,
-                FailureCallback = (logEvent, ex) => Console.WriteLine("Elasticsearch sink error: " + ex.Message),
+                FailureCallback = (logEvent, ex) =>
+                    Console.WriteLine("Elasticsearch sink error: " + ex.Message),
                 CustomFormatter = new ExceptionAsObjectJsonFormatter(renderMessage: true),
                 ModifyConnectionSettings = connectionConfig =>
                 {

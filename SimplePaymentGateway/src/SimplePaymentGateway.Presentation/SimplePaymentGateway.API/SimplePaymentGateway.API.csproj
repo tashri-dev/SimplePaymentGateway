@@ -15,7 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <ProjectReference Include="..\..\SimplePaymentGateway.Core\SimplePaymentGateway.Application\SimplePaymentGateway.Application.csproj" />
+    <ProjectReference Include="..\..\SimplePaymentGateway.Core\SimplePaymentGateway.Domain\SimplePaymentGateway.Domain.csproj" />
+    <ProjectReference Include="..\..\SimplePaymentGateway.Infrastructure\SimplePaymentGateway.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
