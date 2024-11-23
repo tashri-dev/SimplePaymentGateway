@@ -1,59 +1,69 @@
 <div class="payment-container">
-  <div class="card payment-card">
-    <div class="card-header">
-      <h2>Payment Details</h2>
-      <p class="subtitle">Enter your card information securely</p>
-    </div>
+  <mat-card class="payment-card mat-elevation-z8">
+    <mat-card-header>
+      <div class="header-content">
+        <div class="title-section">
+          <mat-card-title>Payment Details</mat-card-title>
+          <mat-card-subtitle>Enter your payment information securely</mat-card-subtitle>
+        </div>
+        <button mat-icon-button color="primary" (click)="logout()">
+          <mat-icon>logout</mat-icon>
+        </button>
+      </div>
+    </mat-card-header>
 
-    <div class="card-content">
-      <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="payment-form">
+    <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
+      <mat-card-content>
         <!-- Card Information Section -->
         <div class="form-section">
           <h3>Card Information</h3>
           <div class="form-row">
-            <div class="form-group full-width">
-              <label for="cardNo">Card Number</label>
-              <input id="cardNo"
-                     type="text"
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Card Number</mat-label>
+              <input matInput
                      formControlName="cardNo"
+                     appCardNumber
                      placeholder="1234 5678 9012 3456"
                      maxlength="19">
-              <span class="error-message">{{getErrorMessage('cardNo')}}</span>
-            </div>
+              <mat-icon matSuffix>credit_card</mat-icon>
+              <mat-error>{{getErrorMessage('cardNo')}}</mat-error>
+            </mat-form-field>
           </div>
 
           <div class="form-row">
-            <div class="form-group full-width">
-              <label for="cardHolder">Cardholder Name</label>
-              <input id="cardHolder"
-                     type="text"
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Cardholder Name</mat-label>
+              <input matInput
                      formControlName="cardHolder"
                      placeholder="JOHN DOE"
                      autocomplete="cc-name">
-              <span class="error-message">{{getErrorMessage('cardHolder')}}</span>
-            </div>
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error>{{getErrorMessage('cardHolder')}}</mat-error>
+            </mat-form-field>
           </div>
 
           <div class="form-row card-details">
-            <div class="form-group">
-              <label for="expiryDate">Expiry Date</label>
-              <input id="expiryDate"
-                     type="text"
+            <mat-form-field appearance="outline">
+              <mat-label>Expiry Date</mat-label>
+              <input matInput
                      formControlName="expiryDate"
+                     appExpiryDate
                      placeholder="MM/YY"
                      autocomplete="cc-exp">
-              <span class="error-message">{{getErrorMessage('expiryDate')}}</span>
-            </div>
+              <mat-error>{{getErrorMessage('expiryDate')}}</mat-error>
+            </mat-form-field>
 
-            <div class="form-group">
-              <label for="cvv">CVV</label>
-              <input id="cvv"
-                     type="password"
+            <mat-form-field appearance="outline">
+              <mat-label>CVV</mat-label>
+              <input matInput
                      formControlName="cvv"
+                     appCvv
+                     type="password"
                      placeholder="***"
                      autocomplete="cc-csc">
-              <span class="error-message">{{getErrorMessage('cvv')}}</span>
-            </div>
+              <mat-icon matSuffix>security</mat-icon>
+              <mat-error>{{getErrorMessage('cvv')}}</mat-error>
+            </mat-form-field>
           </div>
         </div>
 
@@ -61,50 +71,58 @@
         <div class="form-section">
           <h3>Transaction Details</h3>
           <div class="form-row amount-currency">
-            <div class="form-group">
-              <label for="amount">Amount</label>
-              <input id="amount"
-                     type="text"
+            <mat-form-field appearance="outline">
+              <mat-label>Amount</mat-label>
+              <span matPrefix>{{getCurrencySymbol()}}&nbsp;</span>
+              <input matInput
                      formControlName="amountTrxn"
+                     appAmount
+                     [currencyCode]="paymentForm.get('currencyCode')?.value"
                      placeholder="0.00">
-              <span class="error-message">{{getErrorMessage('amountTrxn')}}</span>
-            </div>
+              <mat-error>{{getErrorMessage('amountTrxn')}}</mat-error>
+            </mat-form-field>
 
-            <div class="form-group">
-              <label for="currency">Currency</label>
-              <select id="currency" formControlName="currencyCode" class="select-input">
-                <option *ngFor="let currency of currencies" [value]="currency.code">
+            <mat-form-field appearance="outline">
+              <mat-label>Currency</mat-label>
+              <mat-select formControlName="currencyCode">
+                <mat-option *ngFor="let currency of currencies" [value]="currency.code">
                   {{currency.name}} ({{currency.symbol}})
-                </option>
-              </select>
-            </div>
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
           </div>
 
           <div class="form-row">
-            <div class="form-group full-width">
-              <label for="transactionType">Transaction Type</label>
-              <select id="transactionType" formControlName="functionCode" class="select-input">
-                <option *ngFor="let type of functionCodes" [value]="type.code">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Transaction Type</mat-label>
+              <mat-select formControlName="functionCode">
+                <mat-option *ngFor="let type of functionCodes" [value]="type.code">
                   {{type.name}}
-                </option>
-              </select>
-            </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matSuffix>payments</mat-icon>
+            </mat-form-field>
           </div>
         </div>
+      </mat-card-content>
 
-        <div class="card-actions">
-          <button type="button"
-                  [disabled]="loading"
-                  (click)="paymentForm.reset()">
-            Clear
-          </button>
-          <button type="submit"
-                  [disabled]="paymentForm.invalid || loading">
-            <span *ngIf="!loading">Process Payment</span>
-            <span *ngIf="loading">Loading...</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+      <mat-card-actions>
+        <button mat-button
+                type="button"
+                [disabled]="loading"
+                (click)="resetForm()">
+          <mat-icon>refresh</mat-icon>
+          Clear
+        </button>
+        <button mat-raised-button
+                color="primary"
+                type="submit"
+                [disabled]="paymentForm.invalid || loading">
+          <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+          <mat-icon *ngIf="!loading">payment</mat-icon>
+          <span>Process Payment</span>
+        </button>
+      </mat-card-actions>
+    </form>
+  </mat-card>
 </div>

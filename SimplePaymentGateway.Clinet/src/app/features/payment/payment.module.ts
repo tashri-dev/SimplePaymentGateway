@@ -11,7 +11,7 @@ import { ExpiryDateDirective } from '../../shared/directives/expiry-date.directi
 
 @NgModule({
   declarations: [
-    // Declare components that aren't standalone
+
   ],
   imports: [
     CommonModule,

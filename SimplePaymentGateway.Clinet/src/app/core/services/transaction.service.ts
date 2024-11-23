@@ -18,6 +18,7 @@ export class TransactionService {
   ) {}
 
   async processTransaction(transaction: Transaction): Promise<TransactionResponse> {
+    debugger;
     try {
       this.logger.info('Starting transaction process', { transaction });
 

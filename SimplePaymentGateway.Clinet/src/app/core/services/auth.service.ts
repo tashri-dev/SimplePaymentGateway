@@ -1,7 +1,9 @@
-import { Injectable } from "@angular/core";
+// src/app/core/services/auth.service.ts
+import { Injectable, PLATFORM_ID, Inject } from "@angular/core";
 import { Router } from '@angular/router';
 import { UserInfo } from "../models/auth.model";
 import { BehaviorSubject } from "rxjs";
+import { isPlatformBrowser } from "@angular/common";
 
 @Injectable({
   providedIn: 'root'
@@ -15,13 +17,23 @@ export class AuthService {
 
   private userSubject = new BehaviorSubject<UserInfo | null>(null);
   user$ = this.userSubject.asObservable();
+  private isBrowser: boolean;
 
-  constructor(private router: Router) {
-    // Check for existing token on startup
-    const token = localStorage.getItem(this.STORAGE_KEY);
-    if (token) {
-      const user = this.getUserFromToken(token);
-      this.userSubject.next(user);
+  constructor(
+    private router: Router,
+    @Inject(PLATFORM_ID) platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
+    this.initializeAuthentication();
+  }
+
+  private initializeAuthentication(): void {
+    if (this.isBrowser) {
+      const token = localStorage.getItem(this.STORAGE_KEY);
+      if (token) {
+        const user = this.getUserFromToken(token);
+        this.userSubject.next(user);
+      }
     }
   }
 
@@ -32,7 +44,9 @@ export class AuthService {
 
     if (user) {
       const token = this.generateToken(user);
-      localStorage.setItem(this.STORAGE_KEY, token);
+      if (this.isBrowser) {
+        localStorage.setItem(this.STORAGE_KEY, token);
+      }
       this.userSubject.next({ username: user.username, role: user.role });
       return true;
     }
@@ -40,13 +54,30 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem(this.STORAGE_KEY);
+    if (this.isBrowser) {
+      localStorage.removeItem(this.STORAGE_KEY);
+    }
     this.userSubject.next(null);
     this.router.navigate(['/login']);
   }
 
   isAuthenticated(): boolean {
-    return this.userSubject.value !== null;
+    if (!this.isBrowser) {
+      return false;
+    }
+    const currentUser = this.userSubject.value;
+    if (!currentUser) {
+      const token = localStorage.getItem(this.STORAGE_KEY);
+      if (token) {
+        const user = this.getUserFromToken(token);
+        if (user) {
+          this.userSubject.next(user);
+          return true;
+        }
+      }
+      return false;
+    }
+    return true;
   }
 
   private generateToken(user: any): string {
@@ -62,7 +93,9 @@ export class AuthService {
     try {
       const decoded = JSON.parse(atob(token));
       if (decoded.exp < Date.now()) {
-        localStorage.removeItem(this.STORAGE_KEY);
+        if (this.isBrowser) {
+          localStorage.removeItem(this.STORAGE_KEY);
+        }
         return null;
       }
       return {

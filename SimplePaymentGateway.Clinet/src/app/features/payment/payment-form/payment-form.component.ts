@@ -1,13 +1,46 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { CardNumberDirective } from '../../../shared/directives/card-number.directive';
+import { ExpiryDateDirective } from '../../../shared/directives/expiry-date.directive';
+import { CvvDirective } from '../../../shared/directives/cvv.directive';
+import { AmountDirective } from '../../../shared/directives/amount.directive';
 import { Currency } from '../../../core/models/currency.model';
 import { FunctionCode, Transaction, TransactionResponse } from '../../../core/models/transaction.model';
 import { CurrencyService } from '../../../core/services/currency.service';
 import { LoggerService } from '../../../core/services/logger.service';
 import { TransactionService } from '../../../core/services/transaction.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-payment-form',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    CardNumberDirective,
+    ExpiryDateDirective,
+    CvvDirective,
+    AmountDirective
+  ],
   templateUrl: './payment-form.component.html',
   styleUrls: ['./payment-form.component.scss']
 })
@@ -25,7 +58,8 @@ export class PaymentFormComponent implements OnInit {
     private fb: FormBuilder,
     private transactionService: TransactionService,
     private currencyService: CurrencyService,
-    private logger: LoggerService
+    private logger: LoggerService,
+    private authService:AuthService
   ) {
     this.createForm();
   }
@@ -171,5 +205,24 @@ export class PaymentFormComponent implements OnInit {
   getCurrencySymbol(): string {
     const code = this.paymentForm.get('currencyCode')?.value;
     return this.currencyService.getCurrencyByCode(code)?.symbol ?? '';
+  }
+
+  resetForm(): void {
+    // Reset form with default values
+    this.paymentForm.reset({
+      currencyCode: '840',  // Default to USD
+      functionCode: FunctionCode.Purchase
+    });
+
+    // Clear all form errors
+    Object.keys(this.paymentForm.controls).forEach(key => {
+      const control = this.paymentForm.get(key);
+      control?.setErrors(null);
+      control?.markAsUntouched();
+    });
+  }
+
+  logout(): void {
+    this.authService.logout();
   }
 }

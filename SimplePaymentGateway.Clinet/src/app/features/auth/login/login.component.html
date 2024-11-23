@@ -1,46 +1,58 @@
 <div class="login-container">
-  <div class="card login-card">
-    <div class="card-header">
-      <h2>Payment Gateway Login</h2>
-    </div>
+  <mat-card class="login-card mat-elevation-z8">
+    <mat-card-header>
+      <mat-card-title>Payment Gateway</mat-card-title>
+      <mat-card-subtitle>Sign in to continue</mat-card-subtitle>
+    </mat-card-header>
 
-    <div class="card-content">
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input id="username"
-                 type="text"
-                 formControlName="username"
-                 autocomplete="username"
-                 placeholder="Enter your username">
-          <span class="error-message" *ngIf="loginForm.get('username')?.hasError('required')">
-            Username is required
-          </span>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <mat-card-content>
+        <div class="form-field">
+          <mat-form-field appearance="outline">
+            <mat-label>Username</mat-label>
+            <input matInput
+                   formControlName="username"
+                   placeholder="Enter your username"
+                   autocomplete="username">
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="loginForm.get('username')?.errors?.['required']">
+              Username is required
+            </mat-error>
+          </mat-form-field>
         </div>
 
-        <div class="form-group">
-          <label for="password">Password</label>
-          <div class="input-group">
-            <input id="password"
-                   type="password"
+        <div class="form-field">
+          <mat-form-field appearance="outline">
+            <mat-label>Password</mat-label>
+            <input matInput
+                   [type]="hidePassword ? 'password' : 'text'"
                    formControlName="password"
-                   autocomplete="current-password"
-                   placeholder="Enter your password">
-          </div>
-          <span class="error-message" *ngIf="loginForm.get('password')?.hasError('required')">
-            Password is required
-          </span>
-          <span class="error-message" *ngIf="loginForm.get('password')?.hasError('minlength')">
-            Password must be at least 6 characters
-          </span>
+                   placeholder="Enter your password"
+                   autocomplete="current-password">
+            <button mat-icon-button matSuffix
+                    (click)="hidePassword = !hidePassword"
+                    [attr.aria-label]="'Hide password'"
+                    [attr.aria-pressed]="hidePassword"
+                    type="button">
+              <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            <mat-error *ngIf="loginForm.get('password')?.errors?.['required']">
+              Password is required
+            </mat-error>
+          </mat-form-field>
         </div>
+      </mat-card-content>
 
-        <button class="btn btn-primary full-width" type="submit"
-                [disabled]="loginForm.invalid || loading">
-          <div class="spinner" *ngIf="loading"></div>
-          <span>Login</span>
+      <mat-card-actions>
+        <button mat-raised-button
+                color="primary"
+                type="submit"
+                [disabled]="loginForm.invalid || loading"
+                class="login-button">
+          <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+          <span>Sign In</span>
         </button>
-      </form>
-    </div>
-  </div>
+      </mat-card-actions>
+    </form>
+  </mat-card>
 </div>
