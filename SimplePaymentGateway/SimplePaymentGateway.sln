@@ -1,8 +1,68 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35431.28
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E1BBA9EC-630D-432A-B0F9-04C23B9025A9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{EE961181-59D0-478F-BF81-E3C8C633407F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SimplePaymentGateway.Core", "SimplePaymentGateway.Core", "{A9AC5EBD-9AE4-4CCB-BEA8-BA8C3C9D705F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SimplePaymentGateway.Domain", "SimplePaymentGateway.Domain", "{43B78895-078F-47C2-8A7D-BC250B298A2F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SimplePaymentGateway.Application", "SimplePaymentGateway.Application", "{AB06B76B-5A50-4CC3-BA45-D673AF2C3E5C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SimplePaymentGateway.Infrastructure", "SimplePaymentGateway.Infrastructure", "{39917576-FB98-46EE-8FCF-53D5457F31F0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SimplePaymentGateway.Presentation", "SimplePaymentGateway.Presentation", "{8BD9714E-35D5-4668-8C49-A85DC180F66A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimplePaymentGateway.Domain", "src\SimplePaymentGateway.Core\SimplePaymentGateway.Domain\SimplePaymentGateway.Domain.csproj", "{5A47E9BC-9E21-45FD-9EA3-E735A12CF544}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimplePaymentGateway.Application", "src\SimplePaymentGateway.Core\SimplePaymentGateway.Application\SimplePaymentGateway.Application.csproj", "{5F330F78-8028-4592-B054-ED7C71EA26CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimplePaymentGateway.Infrastructure", "src\SimplePaymentGateway.Infrastructure\SimplePaymentGateway.Infrastructure.csproj", "{190D5F8E-C425-4973-8B72-FB6D992C33DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimplePaymentGateway.API", "src\SimplePaymentGateway.Presentation\SimplePaymentGateway.API\SimplePaymentGateway.API.csproj", "{C918FED4-66E3-4FFE-A275-CE8BCF50AA3D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5A47E9BC-9E21-45FD-9EA3-E735A12CF544}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A47E9BC-9E21-45FD-9EA3-E735A12CF544}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A47E9BC-9E21-45FD-9EA3-E735A12CF544}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A47E9BC-9E21-45FD-9EA3-E735A12CF544}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F330F78-8028-4592-B054-ED7C71EA26CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F330F78-8028-4592-B054-ED7C71EA26CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F330F78-8028-4592-B054-ED7C71EA26CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F330F78-8028-4592-B054-ED7C71EA26CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{190D5F8E-C425-4973-8B72-FB6D992C33DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{190D5F8E-C425-4973-8B72-FB6D992C33DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{190D5F8E-C425-4973-8B72-FB6D992C33DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{190D5F8E-C425-4973-8B72-FB6D992C33DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C918FED4-66E3-4FFE-A275-CE8BCF50AA3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C918FED4-66E3-4FFE-A275-CE8BCF50AA3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C918FED4-66E3-4FFE-A275-CE8BCF50AA3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C918FED4-66E3-4FFE-A275-CE8BCF50AA3D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A9AC5EBD-9AE4-4CCB-BEA8-BA8C3C9D705F} = {E1BBA9EC-630D-432A-B0F9-04C23B9025A9}
+		{43B78895-078F-47C2-8A7D-BC250B298A2F} = {A9AC5EBD-9AE4-4CCB-BEA8-BA8C3C9D705F}
+		{AB06B76B-5A50-4CC3-BA45-D673AF2C3E5C} = {A9AC5EBD-9AE4-4CCB-BEA8-BA8C3C9D705F}
+		{39917576-FB98-46EE-8FCF-53D5457F31F0} = {E1BBA9EC-630D-432A-B0F9-04C23B9025A9}
+		{8BD9714E-35D5-4668-8C49-A85DC180F66A} = {E1BBA9EC-630D-432A-B0F9-04C23B9025A9}
+		{5A47E9BC-9E21-45FD-9EA3-E735A12CF544} = {43B78895-078F-47C2-8A7D-BC250B298A2F}
+		{5F330F78-8028-4592-B054-ED7C71EA26CE} = {AB06B76B-5A50-4CC3-BA45-D673AF2C3E5C}
+		{190D5F8E-C425-4973-8B72-FB6D992C33DE} = {39917576-FB98-46EE-8FCF-53D5457F31F0}
+		{C918FED4-66E3-4FFE-A275-CE8BCF50AA3D} = {8BD9714E-35D5-4668-8C49-A85DC180F66A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FDDB7D35-DED3-492E-80A7-9FEEC85F871B}
 	EndGlobalSection
 EndGlobal
