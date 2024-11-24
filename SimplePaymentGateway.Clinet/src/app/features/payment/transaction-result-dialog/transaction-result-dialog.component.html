@@ -1,0 +1,40 @@
+<h2 mat-dialog-title>Transaction Result</h2>
+
+<mat-dialog-content>
+  <div class="result-container">
+    <div class="status-icon" [ngClass]="getStatusClass()">
+      <mat-icon>{{data.responseCode === '00' ? 'check_circle' : 'error'}}</mat-icon>
+    </div>
+
+    <div class="result-details">
+      <div class="detail-row">
+        <span class="label">Status:</span>
+        <span class="value" [ngClass]="getStatusClass()">
+          {{data.responseCode === '00' ? 'Success' : 'Failed'}}
+        </span>
+      </div>
+
+      <div class="detail-row">
+        <span class="label">Message:</span>
+        <span class="value">{{data.message}}</span>
+      </div>
+
+      <div class="detail-row" *ngIf="data.approvalCode">
+        <span class="label">Approval Code:</span>
+        <span class="value">{{data.approvalCode}}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="label">Date/Time:</span>
+        <span class="value">{{data.dateTime | date:'medium'}}</span>
+      </div>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-raised-button color="primary" (click)="onClose()">
+    <mat-icon>check</mat-icon>
+    Done
+  </button>
+</mat-dialog-actions>
