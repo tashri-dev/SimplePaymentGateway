@@ -18,7 +18,6 @@ export class TransactionService {
   ) {}
 
   async processTransaction(transaction: Transaction): Promise<TransactionResponse> {
-    debugger;
     try {
       this.logger.info('Starting transaction process', { transaction });
 
@@ -41,18 +40,19 @@ export class TransactionService {
         throw new Error('No key identifier available');
       }
 
-      const response = await firstValueFrom(
-        this.http.post<Result<string>>(
-          `${this.apiUrl}/process`,
-          { data: encryptedData },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Key-Identifier': keyIdentifier
-            }
-          }
-        )
-      );
+       // Send the encrypted string directly
+       const response = await firstValueFrom(
+         this.http.post<Result<string>>(
+           `${this.apiUrl}/process`,
+           JSON.stringify(encryptedData), // Send encrypted string directly
+           {
+             headers: {
+               'Content-Type': 'application/json',
+               'X-Key-Identifier': this.encryptionService.getCurrentKeyIdentifier()!
+             }
+           }
+         )
+       );
 
       if (!response.isSuccess) {
         throw new Error(response.error || 'Transaction failed');
